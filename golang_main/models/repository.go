@@ -1,3 +1,4 @@
+package models
 // Repository represents the structure of a code repository.
 type Repository struct {
 	ID        int    `json:"id"`
