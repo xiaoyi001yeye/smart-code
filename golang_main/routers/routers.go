@@ -2,7 +2,6 @@ package routers
 
 import (
     "github.com/kataras/iris/v12"
-    "github.com/smartcodeql/services"
     "github.com/smartcodeql/controllers"
 )
 
