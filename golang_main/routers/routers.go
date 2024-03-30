@@ -3,6 +3,7 @@ package routers
 import (
     "github.com/kataras/iris/v12"
     "github.com/smartcodeql/controllers"
+    "github.com/smartcodeql/services"
 )
 
 // // ConfigureBooksRouter 设置书籍相关的路由
@@ -32,10 +33,12 @@ import (
 // }
 
 func ConfigureCodeqlRouter(app *iris.Application) {
+    service := services.NewCodeQLContainerService()
+    codeQLController := controllers.NewCodeqlController(service)
     codeqlAPI :=app.Party("/codeql")
     {
         codeqlAPI.Use(iris.Compression)
-        codeqlAPI.Get("/status", controllers.GetContainerStatus)
+        codeqlAPI.Get("/status", codeQLController.GetContainerStatus)
     }
 
      
