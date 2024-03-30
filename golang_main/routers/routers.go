@@ -19,23 +19,23 @@ import (
 // }
 
 
-func ConfigureRepoRouter(app *iris.Application) {
-    reposAPI :=app.Party("/repos")
-    {
-        reposAPI.Use(iris.Compression)
-        reposAPI.Get("/", controllers.List)
-        reposAPI.Get("/get", controllers.Get)
+// func ConfigureRepoRouter(app *iris.Application) {
+//     reposAPI :=app.Party("/repos")
+//     {
+//         reposAPI.Use(iris.Compression)
+//         reposAPI.Get("/", controllers.List)
+//         reposAPI.Get("/get", controllers.Get)
         
-    }
+//     }
 
      
-}
+// }
 
 func ConfigureCodeqlRouter(app *iris.Application) {
-    reposAPI :=app.Party("/codeql")
+    codeqlAPI :=app.Party("/codeql")
     {
-        reposAPI.Use(iris.Compression)
-        reposAPI.Get("/status", controllers.GetContainerStatus)
+        codeqlAPI.Use(iris.Compression)
+        codeqlAPI.Get("/status", controllers.GetContainerStatus)
     }
 
      
