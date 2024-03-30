@@ -10,16 +10,7 @@ import (
 )
 
 
-type Repository struct {
-	ID        int       `db:"id"`
-	Name      string    `db:"name"`
-	BranchName string    `db:"branch_name"`
-	RepoPath  string    `db:"repo_path"`
-	Username  string    `db:"username"`
-	Password  string    `db:"password"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
-}
+
 
 
 func QueryRepositories(db *sql.DB, name string, branchName string) ([]Repository, error) {
@@ -29,8 +20,13 @@ func QueryRepositories(db *sql.DB, name string, branchName string) ([]Repository
 	// 构建 WHERE 子句
 	whereClause := ""
 	if name != "" {
-		whereClause += " AND name = $1"	}	if branchName != "" {		whereClause += " AND branch_name = $2"
+		whereClause += " AND name = $1"
 	}
+
+	if branchName != "" {
+		whereClause += " AND branch_name = $2"
+	}
+
 	if whereClause != "" {
 		query += " WHERE " + whereClause[4:] // 去掉多余的 "AND "
 	}
