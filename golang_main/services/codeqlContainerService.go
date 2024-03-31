@@ -4,16 +4,16 @@ package services
 
 import (
 
-	// "log"
+	"log"
 	// "time"
 
-	// "github.com/docker/docker/api/types"
-	// "github.com/docker/docker/client"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/client"
 )
 
 // CodeQLContainerService 结构体
 type CodeQLContainerService struct {
-	// Cli    *client.Client
+	Cli    *client.Client
 }
 
 // NewCodeQLContainerService 创建一个新的 CodeQLContainerService 实例
@@ -21,12 +21,13 @@ func NewCodeQLContainerService() (*CodeQLContainerService) {
 	// var service CodeQLContainerService
 	// var err error
 	
-	// Cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersion("1.40"))
-	// if err != nil {
-	// 	return nil, err
-	// }
+	Cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersion("1.40"))
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
 	return &CodeQLContainerService{
-		// Cli:    Cli
+		Cli:    Cli
 	}
 }
 
@@ -79,10 +80,10 @@ func NewCodeQLContainerService() (*CodeQLContainerService) {
 
 
 func (service *CodeQLContainerService) GetContainerStatus() (string,error) {
-	// containerInfo, err := service.Cli.ContainerInspect(context.Background(),"codeql-container")
-	// if err != nil {
-	// 	return types.ContainerState{}, err
-	// }
-	// return containerInfo.State, nil
-	return "OK",nil
+	containerInfo, err := service.Cli.ContainerInspect(context.Background(),"codeql-container")
+	if err != nil {
+		return types.ContainerState{}, err
+	}
+	return containerInfo.State, nil
+	// return "OK",nil
 }

@@ -5,8 +5,9 @@ WORKDIR /go/src/app
 COPY golang_main .
 ENV GOPROXY=https://goproxy.io
 RUN go get github.com/kataras/iris/v12
-# RUN go get github.com/docker/docker/api/types
-# RUN go get github.com/docker/docker/client
+RUN go get golang.org/x/xerrors
+RUN go get github.com/docker/docker/api/types
+RUN go get github.com/docker/docker/client
 RUN go get github.com/lib/pq
 RUN go build -o main
 
