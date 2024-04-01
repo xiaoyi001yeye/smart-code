@@ -3,7 +3,7 @@
 package services
 
 import (
-
+	"context"
 	"log"
 	// "time"
 
@@ -13,22 +13,20 @@ import (
 
 // CodeQLContainerService 结构体
 type CodeQLContainerService struct {
-	Cli    *client.Client
+	Cli *client.Client
 }
 
 // NewCodeQLContainerService 创建一个新的 CodeQLContainerService 实例
-func NewCodeQLContainerService() (*CodeQLContainerService) {
+func NewCodeQLContainerService() *CodeQLContainerService {
 	// var service CodeQLContainerService
 	// var err error
-	
-	Cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersion("1.40"))
+
+	Cli, err := client.NewClientWithOpts(client.FromEnv, client.WithVersion("1.40"))
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
-	return &CodeQLContainerService{
-		Cli:    Cli
-	}
+	return &CodeQLContainerService{Cli: Cli}
 }
 
 // RunScan 启动 CodeQL 扫描器容器
@@ -78,12 +76,11 @@ func NewCodeQLContainerService() (*CodeQLContainerService) {
 // 	return nil
 // }
 
-
-func (service *CodeQLContainerService) GetContainerStatus() (string,error) {
-	containerInfo, err := service.Cli.ContainerInspect(context.Background(),"codeql-container")
+func (service *CodeQLContainerService) GetContainerStatus() (string, error) {
+	containerInfo, err := service.Cli.ContainerInspect(context.Background(), "codeql-container")
 	if err != nil {
-		return types.ContainerState{}, err
+		return types.ContainerState{}.Status, err
 	}
-	return containerInfo.State, nil
+	return containerInfo.State.Status, nil
 	// return "OK",nil
 }
