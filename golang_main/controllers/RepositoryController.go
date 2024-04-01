@@ -3,11 +3,11 @@
 package controllers
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	"net/http"
 
 	"github.com/kataras/iris/v12"
-	"github.com/smartcodeql/models"
+	// "github.com/smartcodeql/models"
 	"github.com/smartcodeql/repositories"
 )
 
@@ -39,18 +39,18 @@ func (ctrl *RepositoryController) List(ctx iris.Context) {
 
 // Get handles the HTTP GET request for getting a specific repository by ID.
 func (ctrl *RepositoryController) Get(ctx iris.Context) {
-	repositoryID := ctx.Params().Get("id")
-	repository, err := ctrl.RepositoryDAO.GetRepositoryByID(repositoryID)
-	if err != nil {
-		if errors.Is(err, repositories.ErrRepositoryNotFound) {
-			ctx.StatusCode(http.StatusNotFound)
-			ctx.Writef("Repository not found: %v", err)
-		} else {
-			ctx.StatusCode(http.StatusInternalServerError)
-			ctx.Writef("Error retrieving repository: %v", err)
-		}
-		return
-	}
+	// repositoryID := ctx.Params().Get("id")
+	// repository, err := ctrl.RepositoryDAO.GetRepositoryByID(repositoryID)
+	// if err != nil {
+	// 	// if errors.Is(err, repositories.ErrRepositoryNotFound) {
+	// 	// 	ctx.StatusCode(http.StatusNotFound)
+	// 	// 	ctx.Writef("Repository not found: %v", err)
+	// 	// } else {
+	// 	ctx.StatusCode(http.StatusInternalServerError)
+	// 	ctx.Writef("Error retrieving repository: %v", err)
+	// 	// }
+	// 	return
+	// }
 
-	ctx.JSON(repository)
+	// ctx.JSON(repository)
 }

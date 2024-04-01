@@ -8,6 +8,9 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 3000:3000
+    depends_on:
+      - codeql-container
+      - postgres
   postgres:
     image: postgres:16.2-alpine3.19
     environment:
@@ -15,7 +18,17 @@ services:
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
     volumes:
-      - db_data:/var/lib/postgresql/data
-      - initdb:/docker-entrypoint-initdb.d
+      - ./db_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
+  codeql-container:
+    image: mcr.microsoft.com/codeql/codeql-container
+    volumes: 
+      - /home/weiyi/code/guava/guava:/opt/src
+      - ./results:/opt/results
+    environment:
+      CODEQL_CLI_ARGS: version
+
+
+
