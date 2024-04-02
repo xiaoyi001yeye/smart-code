@@ -1,4 +1,6 @@
-package config
+package main
+
+import "fmt"
 
 type DbConfig struct {
 	Host     string
@@ -18,8 +20,7 @@ func DefaultDbConfig() DbConfig {
 	}
 }
 
-
-func (c DbConfig) DbConnectionString() string {
+func DbConnectionString(c DbConfig) string {
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		c.Host, c.Port, c.User, c.Password, c.Database)
 }
