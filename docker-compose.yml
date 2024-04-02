@@ -23,7 +23,7 @@ services:
     ports:
       - "5432:5432"
   codeql-container:
-    image: mcr.microsoft.com/codeql/codeql-container
+    image: mcr.microsoft.com/cstsectools/codeql-container
     volumes: 
       - /home/weiyi/code/guava/guava:/opt/src
       - ./results:/opt/results
