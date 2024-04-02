@@ -23,6 +23,7 @@ type TaskDescription struct {
 	OutputPath string `json:"outputPath"`
 	TaskId     string `json:"TaskId"`
 	Language   string `json:"language"`
+	Qlpack     string `json:"qlpack"`
 }
 
 var CodeQLImageId = "mcr.microsoft.com/cstsectools/codeql-container:latest"
@@ -43,7 +44,7 @@ func main() {
 	defer db.Close()
 	go func() {
 		for {
-			rows, err := db.Query("SELECT * FROM tasks WHERE is_completed = false ORDER BY created_at ASC LIMIT 1")
+			rows, err := db.Query("SELECT task_id,input_path,output_path,languge,qlpack FROM tasks WHERE current_step in ('New')  ORDER BY created_at ASC LIMIT 1")
 			if err != nil {
 				log.Println("查询新数据出错:", err)
 				time.Sleep(5 * time.Second)
@@ -55,18 +56,19 @@ func main() {
 				var inputPath string
 				var outputPath string
 				var codeLanguage string
+				var qlpack string
 				// 读取数据并进行处理
-				err := rows.Scan(&taskID, &inputPath, &outputPath, &codeLanguage)
+				err := rows.Scan(&taskID, &inputPath, &outputPath, &codeLanguage, &qlpack)
 				if err != nil {
 					log.Println("扫描数据出错:", err)
 					continue
 				}
 
 				// 处理数据的逻辑
-				fmt.Printf("处理新数据:taskID=%s, inputPath=%s, outputPath=%s,language=%s\n", taskID, inputPath, outputPath, codeLanguage)
+				fmt.Printf("处理新数据:taskID=%s, inputPath=%s, outputPath=%s,language=%s,qlpack=%s\n", taskID, inputPath, outputPath, codeLanguage, qlpack)
 
 				// 标记数据已处理
-				_, err = db.Exec("UPDATE tasks SET is_processed = true WHERE task_id = $1", taskID)
+				_, err = db.Exec("UPDATE tasks SET current_step = 'Doing' WHERE task_id = $1", taskID)
 				if err != nil {
 					log.Println("更新数据状态出错:", err)
 				}
@@ -89,10 +91,25 @@ func main() {
 					fmt.Sprintf("CODEQL_CLI_ARGS=database analyze /opt/results/source_db --format=sarifv2 --output=/opt/results/issues.sarif %s-%s.qls", codeLanguage, qlpack),
 				}
 
-				createAndStartContainer(cli, createDatabaseEnv, inputPath, outputPath, taskID)
-				createAndStartContainer(cli, upgradeDatabaseEnv, inputPath, outputPath, taskID)
-				createAndStartContainer(cli, analyzeEnv, inputPath, outputPath, taskID)
-
+				err1 := createAndStartContainer(cli, createDatabaseEnv, inputPath, outputPath, taskID)
+				if err1 != nil {
+					updateTaskStatus(db, taskID, TaskStatusFailed)
+					log.Printf("An error occurred: %s", err)
+					continue
+				}
+				err2 := createAndStartContainer(cli, upgradeDatabaseEnv, inputPath, outputPath, taskID)
+				if err2 != nil {
+					updateTaskStatus(db, taskID, TaskStatusFailed)
+					log.Printf("An error occurred: %s", err)
+					continue
+				}
+				err3 := createAndStartContainer(cli, analyzeEnv, inputPath, outputPath, taskID)
+				if err3 != nil {
+					updateTaskStatus(db, taskID, TaskStatusFailed)
+					log.Printf("An error occurred: %s", err)
+					continue
+				}
+				updateTaskStatus(db, taskID, TaskStatusDone)
 				log.Printf("task %s finished.", taskID)
 
 			}
@@ -106,7 +123,14 @@ func main() {
 
 }
 
-func createAndStartContainer(cli *client.Client, commandEnv []string, inputPath, outputPath, taskID string) {
+func updateTaskStatus(db *sql.DB, taskID string, status TaskStatus) {
+	_, err := db.Exec("UPDATE tasks SET status = ? WHERE task_id = ?", status, taskID)
+	if err != nil {
+		log.Printf("更新任务状态出错: %s", err)
+	}
+}
+
+func createAndStartContainer(cli *client.Client, commandEnv []string, inputPath, outputPath, taskID string) error {
 	containerConfig := &container.Config{
 		Image: CodeQLImageId,
 		Env:   commandEnv,
@@ -140,36 +164,42 @@ func createAndStartContainer(cli *client.Client, commandEnv []string, inputPath,
 	//}
 	platform := &v1.Platform{}
 
-	createResponse, err := cli.ContainerCreate(context.Background(), containerConfig, hostConfig, networkingConfig, platform)
+	createResponse, err := cli.ContainerCreate(context.Background(), containerConfig, hostConfig, networkingConfig, platform, containerName)
 	if err != nil {
-		log.Printf("Error creating container for task %s: %s", taskID, err.Error())
-		return
+		return fmt.Errorf("error creating container for task %s: %w", taskID, err)
 	}
 	containerId := createResponse.ID
 
 	err = cli.ContainerStart(context.Background(), containerId, container.StartOptions{})
 	if err != nil {
-		log.Printf("Error starting container for task %s: %s", taskID, err.Error())
-		return
+		cli.ContainerRemove(context.Background(), containerId, container.RemoveOptions{}) // 尝试清理容器
+		return fmt.Errorf("error starting container for task %s: %w", taskID, err)
 	}
 
 	waitResponseCh, errCh := cli.ContainerWait(context.Background(), containerId, container.WaitConditionNotRunning)
 	select {
 	case status := <-waitResponseCh:
-		log.Printf("Container %s for task %s finished with status %d\n", containerId, taskID, status.StatusCode)
+		if status.StatusCode != 0 {
+			return fmt.Errorf("container for task %s exited with non-zero status code: %d", taskID, status.StatusCode)
+		}
 	case err := <-errCh:
-		log.Printf("Container %s for task %s encountered an error: %s\n", containerId, taskID, err)
+		return fmt.Errorf("container for task %s encountered an error: %w", taskID, err)
 	}
 
 	err = cli.ContainerRemove(context.Background(), containerId, container.RemoveOptions{})
 	if err != nil {
-		log.Printf("Error removing container for task %s: %s", taskID, err.Error())
+		return fmt.Errorf("error removing container for task %s: %w", taskID, err)
 	}
+
+	return nil
+
 }
 
 func runTask(w http.ResponseWriter, r *http.Request) {
 	inputPath := r.FormValue("inputPath")
 	outputPath := r.FormValue("outputPath")
+	language := r.FormValue("language")
+	qlpack := r.FormValue("qlpack")
 	if inputPath == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("参数inputPath未传递"))
@@ -180,10 +210,14 @@ func runTask(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("参数outputPath未传递"))
 		return
 	}
-	language := r.FormValue("language")
 	if language == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("参数language未传递"))
+		return
+	}
+	if qlpack == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("参数qlpack未传递"))
 		return
 	}
 
@@ -198,7 +232,7 @@ func runTask(w http.ResponseWriter, r *http.Request) {
 
 	// 查询是否有未完成的任务
 	var hasUncompletedTask bool
-	err = db.QueryRow("SELECT COUNT(*) FROM codeql_tasks WHERE is_completed = false").Scan(&hasUncompletedTask)
+	err = db.QueryRow("SELECT COUNT(*) FROM codeql_tasks WHERE current_step not in('Done','Failed')").Scan(&hasUncompletedTask)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("查询未完成任务失败"))
@@ -213,12 +247,16 @@ func runTask(w http.ResponseWriter, r *http.Request) {
 
 	taskID := uuid.New().String()
 
-	stmt, err := db.Prepare("INSERT INTO tasks (task_id, input_path, output_path, task_type, current_step, is_completed) VALUES ($1, $2, $3, $4, $5, $6)")
-	if err != nil {
-		log.Fatal(err)
-	}
+	stmt, err := db.Prepare("INSERT INTO tasks (task_id, input_path, output_path, code_language, qlpack, task_type, current_step) VALUES ($1, $2, $3, $4, $5, $6, $7)")
 
-	_, err = stmt.Exec(taskID, inputPath, outputPath, TaskTypeAnalyse, 1, false)
+	_, err = stmt.Exec(taskID,
+		inputPath,
+		outputPath,
+		language,
+		qlpack,
+		TaskTypeAnalyse,
+		TaskStatusNew)
+
 	if err != nil {
 		log.Fatal(err)
 	}

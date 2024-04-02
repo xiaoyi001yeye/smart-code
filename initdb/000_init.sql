@@ -1,13 +1,13 @@
 CREATE TABLE IF NOT EXISTS tasks (
     task_id TEXT PRIMARY KEY,
     input_path TEXT NOT NULL,
-    result_path TEXT NOT NULL,
+    output_path TEXT NOT NULL,
     code_language TEXT NOT NULL,
+    qlpack TEXT NOT NULL,
     task_type TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    current_step INT,
-    is_completed BOOLEAN
+    current_step TEXT
 );
 
 -- CREATE TABLE IF NOT EXISTS repositories (
