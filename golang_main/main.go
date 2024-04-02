@@ -80,15 +80,15 @@ func main() {
 				}
 
 				createDatabaseEnv := []string{
-					fmt.Sprintf("CODEQL_CLI_ARGS=database create --language=%s /opt/results/source_db -s /opt/src", codeLanguage),
+					"CODEQL_CLI_ARGS=database create --language=" + codeLanguage + " /opt/results/source_db -s /opt/src",
 				}
 
 				upgradeDatabaseEnv := []string{
-					fmt.Sprintf("CODEQL_CLI_ARGS=database upgrade /opt/results/source_db"),
+					"CODEQL_CLI_ARGS=database upgrade /opt/results/source_db",
 				}
 
 				analyzeEnv := []string{
-					fmt.Sprintf("CODEQL_CLI_ARGS=database analyze /opt/results/source_db --format=sarifv2 --output=/opt/results/issues.sarif %s-%s.qls", codeLanguage, qlpack),
+					"CODEQL_CLI_ARGS=database analyze /opt/results/source_db --format=sarifv2 --output=/opt/results/issues.sarif " + codeLanguage + "-" + qlpack + ".qls",
 				}
 
 				err1 := createAndStartContainer(cli, createDatabaseEnv, inputPath, outputPath, taskID)
@@ -248,7 +248,9 @@ func runTask(w http.ResponseWriter, r *http.Request) {
 	taskID := uuid.New().String()
 
 	stmt, err := db.Prepare("INSERT INTO tasks (task_id, input_path, output_path, code_language, qlpack, task_type, current_step) VALUES ($1, $2, $3, $4, $5, $6, $7)")
-
+	if err != nil {
+		log.Fatal(err)
+	}
 	_, err = stmt.Exec(taskID,
 		inputPath,
 		outputPath,
