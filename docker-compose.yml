@@ -18,7 +18,7 @@ services:
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
     volumes:
-      - ./db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
       - ./initdb:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
@@ -29,6 +29,9 @@ services:
       - ./results:/opt/results
     environment:
       CODEQL_CLI_ARGS: version
+volumes:
+  db_data:
+    driver: local
 
 
 
