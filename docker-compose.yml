@@ -8,6 +8,7 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 3000:3000
+      - 40000:40000
     depends_on:
       - codeql-container
       - postgres
