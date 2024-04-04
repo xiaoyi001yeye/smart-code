@@ -1,0 +1,4 @@
+{
+    "ollama-autocoder.model": "codellama:13b",
+    "ollama-autocoder.temperature": 0.8
+}

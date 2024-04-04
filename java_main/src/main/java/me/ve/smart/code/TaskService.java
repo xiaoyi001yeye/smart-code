@@ -1,4 +1,4 @@
-package me.ve.smart.code.service;
+package me.ve.smart.code;
 
 public class TaskService {
 }

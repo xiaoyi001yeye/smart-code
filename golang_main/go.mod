@@ -5,8 +5,8 @@ go 1.21
 require (
 	github.com/docker/docker v26.0.0+incompatible
 	github.com/google/uuid v1.5.0
-	github.com/opencontainers/image-spec v1.1.0
 	github.com/lib/pq v1.10.9
+	github.com/opencontainers/image-spec v1.1.0
 )
 
 require (

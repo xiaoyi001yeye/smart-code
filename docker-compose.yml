@@ -1,14 +1,24 @@
 version: '3.4'
 
 services:
-  smartcodeql:
-    image: smartcodeql
+  # smartcodeql:
+  #   image: smartcodeql
+  #   build:
+  #     context: .
+  #     dockerfile: ./Dockerfile
+  #   ports:
+  #     - 3000:3000
+  #     - 40000:40000
+  #   depends_on:
+  #     - codeql-container
+  #     - postgres
+  smartcodeql-java:
+    image: smartcodeql-java
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./java_main/Dockerfile
     ports:
-      - 3000:3000
-      - 40000:40000
+      - 8080:8080
     depends_on:
       - codeql-container
       - postgres

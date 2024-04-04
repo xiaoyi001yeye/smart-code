@@ -12,7 +12,7 @@ type DbConfig struct {
 
 func DefaultDbConfig() DbConfig {
 	return DbConfig{
-		Host:     "postgres",
+		Host:     "localhost",
 		Port:     "5432",
 		Database: "mydatabase",
 		User:     "myuser",

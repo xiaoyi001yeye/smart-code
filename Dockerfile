@@ -16,7 +16,7 @@ RUN go mod tidy
 # RUN go get github.com/docker/docker/api/types
 # RUN go get github.com/docker/docker/client
 # RUN go get github.com/lib/pq
-RUN CGO_ENABLED=1 GOFLAGS=-mod=vendor go build -gcflags "all=-N -l" -o main
+RUN CGO_ENABLED=0 GOFLAGS=-mod=mod go build -gcflags "all=-N -l" -o main
 
 #final stage
 FROM alpine:latest

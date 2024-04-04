@@ -1,4 +1,9 @@
 package me.ve.smart.code;
 
-public class Task {
+import jakarta.persistence.Entity;
+
+@Entity
+@Table
+public class TaskEntity {
+
 }
