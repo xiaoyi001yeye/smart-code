@@ -7,8 +7,9 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/codql")
 public class CodeQlRest {
-    /**
-     *
+    /** 
+     * This is the method that handles HTTP GET requests. The return type send back a text
+     *  
      */
     @GET
     @Produces(MediaType.TEXT_PLAIN)
