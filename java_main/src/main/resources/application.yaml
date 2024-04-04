@@ -1,0 +1,11 @@
+#增加pg database configuration
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/mydatabase?useSSL=false&serverTimezone=UTC
+    username: myuser
+    password: mypassword
+    driver-class-name: org.postgresql.Driver
+
+
+
+
