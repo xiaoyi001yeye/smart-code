@@ -2,7 +2,7 @@
 
 ## 介绍
 
-Smart-CodeQL 是一个基于 GitHub CodeQL 静态分析工具的智能扩展项目。使你更容易得管理CodeQL。
+Smart-CodeQL 是一个基于 GitHub CodeQL 静态分析工具的智能扩展项目。使你更容易管理CodeQL。
 
 ## 环境要求  
 

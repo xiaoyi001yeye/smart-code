@@ -1,0 +1,6 @@
+{
+    "ollama-autocoder.model": "codellama:13b",
+    "ollama-autocoder.temperature": 0.8,
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.updateBuildConfiguration": "interactive"
+}
