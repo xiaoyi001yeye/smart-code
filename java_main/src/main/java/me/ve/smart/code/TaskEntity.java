@@ -1,16 +1,19 @@
 package me.ve.smart.code;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Entity
 @Table(name = "tasks")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TaskEntity {
 
 
@@ -30,11 +33,13 @@ public class TaskEntity {
     @Column(name = "qlpack")
     private String qlpack;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "task_type")
-    private String taskType;
+    private TaskTypeEnum taskType;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "current_step")
-    private String currentStep;
+    private TaskStatusEnum currentStep;
 
     @Column(name = "created_at")
     private Date createdAt;
