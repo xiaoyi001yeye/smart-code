@@ -6,9 +6,11 @@ import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.DockerClientBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class DockerService {
 
     private static final String CODEQL_IMAGE_NAME = "mcr.microsoft.com/cstsectools/codeql-container:latest";

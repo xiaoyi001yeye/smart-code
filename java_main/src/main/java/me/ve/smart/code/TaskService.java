@@ -1,5 +1,6 @@
 package me.ve.smart.code;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
@@ -7,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Service
+@Slf4j
 public class TaskService implements CommandLineRunner {
 
     final TaskRepository taskRepository;
