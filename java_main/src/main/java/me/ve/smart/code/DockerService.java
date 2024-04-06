@@ -5,7 +5,6 @@ import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Volume;
-import com.github.dockerjava.core.DockerClientBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +16,11 @@ public class DockerService {
 
     private static final String CODEQL_CONTAINER_NAME = "codeql-container";
 
-    private final DockerClient dockerClient = DockerClientBuilder.getInstance().build();
+    private final DockerClient dockerClient;
+
+    public DockerService(DockerClient dockerClient) {
+        this.dockerClient = dockerClient;
+    }
 
 
     public void analyse(TaskEntity task) {
